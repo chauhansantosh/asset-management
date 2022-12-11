@@ -1,0 +1,127 @@
+package com.hcl
+
+import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.ValidationException
+import static org.springframework.http.HttpStatus.*
+
+class WorkOrderController {
+
+    WorkOrderService workOrderService
+
+    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
+
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_TECHNICIAN'])
+    def index(Integer max) {
+        params.max = Math.min(max ?: 10, 100)
+        respond workOrderService.list(params), model:[workOrderCount: workOrderService.count()]
+    }
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_TECHNICIAN'])
+    def show(Long id) {
+        respond workOrderService.get(id)
+    }
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR'])
+    def create() {
+        respond new WorkOrder(params)
+    }
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR'])
+    def save(WorkOrder workOrder) {
+        if (workOrder == null) {
+            notFound()
+            return
+        }
+
+        try {
+            workOrderService.save(workOrder)
+        } catch (ValidationException e) {
+            respond workOrder.errors, view:'create'
+            return
+        }
+
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.created.message', args: [message(code: 'workOrder.label', default: 'WorkOrder'), workOrder.id])
+                redirect workOrder
+            }
+            '*' { respond workOrder, [status: CREATED] }
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_TECHNICIAN'])
+    def edit(Long id) {
+        respond workOrderService.get(id)
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_TECHNICIAN'])
+    def update(WorkOrder workOrder) {
+        if (workOrder == null) {
+            notFound()
+            return
+        }
+
+        try {
+            workOrderService.save(workOrder)
+        } catch (ValidationException e) {
+            respond workOrder.errors, view:'edit'
+            return
+        }
+
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.updated.message', args: [message(code: 'workOrder.label', default: 'WorkOrder'), workOrder.id])
+                redirect workOrder
+            }
+            '*'{ respond workOrder, [status: OK] }
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR'])
+    def delete(Long id) {
+        if (id == null) {
+            notFound()
+            return
+        }
+
+        workOrderService.delete(id)
+
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.deleted.message', args: [message(code: 'workOrder.label', default: 'WorkOrder'), id])
+                redirect action:"index", method:"GET"
+            }
+            '*'{ render status: NO_CONTENT }
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR','ROLE_TECHNICIAN'])
+    def search(params) {
+        def result =[:]
+
+        if (params.q) {
+            def criteria = WorkOrder.createCriteria()
+            result.workOrderInstanceList = criteria.list(params) {
+                or {
+                    like("workOrderNumber", "%${params.q}%")
+                    like("description", "%${params.q}%")
+                    like("status", "%${params.q}%")
+                    like("workType", "%${params.q}%")
+                }
+            }
+        } else {
+            result.workOrderInstanceList = WorkOrder.list(params)
+        }
+        result.workOrderInstanceTotal = WorkOrder.count()
+
+        render(view: "search", model: [workOrderInstanceTotal: result.workOrderInstanceTotal,
+                                       workOrderInstanceList: result.workOrderInstanceList,searchText:params.q])
+    }
+
+    protected void notFound() {
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'workOrder.label', default: 'WorkOrder'), params.id])
+                redirect action: "index", method: "GET"
+            }
+            '*'{ render status: NOT_FOUND }
+        }
+    }
+}
