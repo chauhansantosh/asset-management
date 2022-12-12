@@ -7,6 +7,7 @@ interface WorkOrderService {
 
     WorkOrder get(Serializable id)
 
+
     List<WorkOrder> list(Map args)
 
     Long count()
@@ -14,5 +15,9 @@ interface WorkOrderService {
     void delete(Serializable id)
 
     WorkOrder save(WorkOrder workOrder)
+
+    List<WorkOrder> findAllByOwner(User owner)
+
+    Long countByOwner(User owner)
 
 }
