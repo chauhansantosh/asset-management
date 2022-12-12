@@ -24,8 +24,6 @@ class BootStrap {
         if (!user) user = new User(
                 username: username,
                 password: password,
-                siteId: "NOIDA",
-                companyId: "HCL",
                 enabled: true,
                 person: new Person(name: username, lastName: lastname, email:email)).save()
         if (!user)  println "Unable to save user ${username}"

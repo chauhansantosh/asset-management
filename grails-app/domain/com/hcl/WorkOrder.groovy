@@ -43,10 +43,10 @@ class WorkOrder {
     Date dateCreated
 
     static constraints = {
-        workOrderNumber blank:false, maxSize: 25
+        workOrderNumber maxSize: 25
         description maxSize: 100, nullable: true
-        status blank:false, maxSize: 16
-        workType blank:false, maxSize: 5
+        status maxSize: 16
+        workType maxSize: 5, nullable: true
         asset nullable: true
         location nullable: true
         updatedBy maxSize:30, display: false, nullable: true
@@ -75,13 +75,12 @@ class WorkOrder {
         remainingDuration nullable: true, display: false
         supervisor maxSize: 30, nullable: true
         isDisabled display: false
-        companyId blank:false, maxSize: 8
-        siteId blank:false, maxSize: 8
+        companyId maxSize: 8
+        siteId maxSize: 8
         vendor maxSize: 12, nullable: true
         owner maxSize: 30, nullable: true
         ownerGroup maxSize: 8, nullable: true
     }
-
     static mapping = {
         id column: 'workorderuid'
     }

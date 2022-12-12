@@ -33,7 +33,7 @@
                     </g:hasErrors>
                     <g:form resource="${this.workOrder}" method="PUT">
                         <g:hiddenField name="version" value="${this.workOrder?.version}" />
-                        <fieldset class="form row">
+                        <fieldset class="form">
                             <f:all bean="workOrder"/>
                         </fieldset>
                         <fieldset class="buttons">

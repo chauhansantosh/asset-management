@@ -1,27 +1,19 @@
 package com.hcl
 
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.ValidationException
 import static org.springframework.http.HttpStatus.*
-import grails.plugin.springsecurity.SpringSecurityUtils
 
 class WorkOrderController {
 
     WorkOrderService workOrderService
-    SpringSecurityService springSecurityService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_TECHNICIAN'])
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        if(SpringSecurityUtils.ifAllGranted("ROLE_TECHNICIAN")) {
-            User user = User.findById(springSecurityService.currentUserId)
-            respond workOrderService.findAllByOwner(user), model:[workOrderCount: workOrderService.countByOwner(user)]
-        } else {
-            respond workOrderService.list(params), model:[workOrderCount: workOrderService.count()]
-        }
+        respond workOrderService.list(params), model:[workOrderCount: workOrderService.count()]
     }
     @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_TECHNICIAN'])
     def show(Long id) {
@@ -101,41 +93,23 @@ class WorkOrderController {
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_SUPERVISOR','ROLE_TECHNICIAN'])
-    def search(params, WorkOrder workOrder) {
+    def search(params) {
         def result =[:]
-        if(SpringSecurityUtils.ifAllGranted("ROLE_TECHNICIAN")) {
-            User user = User.get(springSecurityService.currentUserId)
-            if (params.q) {
-                def results = WorkOrder.findAll("""
-                                        from WorkOrder as w
-                                        where w.owner.id = ${user.id}
-                                        and (w.workOrderNumber like :q
-                                        or w.description like :q
-                                        or w.status like :q
-                                        or w.workType like :q)""", [q: "%${params.q}%"])
-                result.workOrderInstanceList = results
-            } else {
-                result.workOrderInstanceList = WorkOrder.findAllByOwner(user)
-            }
-            result.workOrderInstanceTotal = workOrderService.countByOwner(user)
 
-        } else {
-            if (params.q) {
-                def criteria = WorkOrder.createCriteria()
-                result.workOrderInstanceList = criteria.list(params) {
-                    or {
-                        like("workOrderNumber", "%${params.q}%")
-                        like("description", "%${params.q}%")
-                        like("status", "%${params.q}%")
-                        like("workType", "%${params.q}%")
-                    }
+        if (params.q) {
+            def criteria = WorkOrder.createCriteria()
+            result.workOrderInstanceList = criteria.list(params) {
+                or {
+                    like("workOrderNumber", "%${params.q}%")
+                    like("description", "%${params.q}%")
+                    like("status", "%${params.q}%")
+                    like("workType", "%${params.q}%")
                 }
-            } else {
-                result.workOrderInstanceList = WorkOrder.list(params)
             }
-            result.workOrderInstanceTotal = WorkOrder.count()
+        } else {
+            result.workOrderInstanceList = WorkOrder.list(params)
         }
-
+        result.workOrderInstanceTotal = WorkOrder.count()
 
         render(view: "search", model: [workOrderInstanceTotal: result.workOrderInstanceTotal,
                                        workOrderInstanceList: result.workOrderInstanceList,searchText:params.q])

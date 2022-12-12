@@ -29,14 +29,14 @@ class Asset implements Serializable {
 	Location location
 
 	static constraints = {
-		assetNumber blank:false, maxSize: 25
+		assetNumber maxSize: 25
 		description maxSize: 100, nullable: true
-		status blank:false, maxSize: 20
-		assetType blank:false, maxSize: 15
+		status maxSize: 20
+		assetType maxSize: 15
 		location nullable: true
 		assetParent maxSize: 25, nullable: true
-		siteId maxSize: 8, blank:false
-		companyId maxSize: 8, blank:false
+		siteId maxSize: 8, nullable: false
+		companyId maxSize: 8, nullable: false
 		vendor maxSize: 12, nullable: true
 		manufacturer maxSize: 12, nullable: true
 		purchasePrice scale: 2, nullable: true

@@ -16,14 +16,14 @@ class Location {
     Date dateCreated
 
     static constraints = {
-        location blank:false, maxSize: 12
+        location maxSize: 12
         description maxSize: 100, nullable: true
-        status blank:false, maxSize: 20
-        locationType blank:false, maxSize: 16
-        siteId blank:false, maxSize: 8, nullable: false
-        companyId blank:false, maxSize: 8, nullable: false
-        replaceCost scale: 2, nullable: true, display:false
-        installDate nullable: true, display: false
+        status maxSize: 20
+        locationType maxSize: 16
+        siteId maxSize: 8, nullable: false
+        companyId maxSize: 8, nullable: false
+        replaceCost scale: 2, nullable: true
+        installDate nullable: true
         updatedBy maxSize: 30, nullable: true, display: false
         lastUpdated display: false
         isDisabled display: false

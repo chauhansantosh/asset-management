@@ -22,7 +22,7 @@ class RegisterController {
             return
         } else {
             try {
-                def user = getOrCreateUser(params.username, params.password, params.name,params.lastName, params.email)
+                def user = User.findByUsername(params.username) ?: new User(username: params.username, password: params.password, person: new Person(name: params.name, lastName: params.lastName, email: params.email)).save()
                 def role = getOrCreateRole("ROLE_USER")
                 if (user && role) {
                     UserRole.create user, role
@@ -52,18 +52,5 @@ class RegisterController {
         if (!role) role = new Role(authority: name).save()
         if (!role)  println "Unable to save role ${name}"
         return role
-    }
-
-    private getOrCreateUser(String username, String password, String name, String lastname, String email) {
-        def user = User.findByUsername(username)
-        if (!user) user = new User(
-                username: username,
-                password: password,
-                siteId: "NOIDA",
-                companyId: "HCL",
-                enabled: true,
-                person: new Person(name: name, lastName: lastname, email:email)).save()
-        if (!user)  println "Unable to save user ${username}"
-        return user
     }
 }
