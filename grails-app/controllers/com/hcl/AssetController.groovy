@@ -3,26 +3,27 @@ package com.hcl
 import grails.validation.ValidationException
 import static org.springframework.http.HttpStatus.*
 import grails.plugin.springsecurity.annotation.Secured
-
+@Secured(['ROLE_ADMIN','ROLE_ASSETMANAGER'])
 class AssetController {
 
     AssetService assetService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
-    @Secured(['ROLE_ADMIN', 'ROLE_ASSETMANAGER'])
+
+
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
         respond assetService.list(params), model:[assetCount: assetService.count()]
     }
-    @Secured(['ROLE_ADMIN', 'ROLE_ASSETMANAGER'])
+
     def show(Long id) {
         respond assetService.get(id)
     }
-    @Secured(['ROLE_ADMIN', 'ROLE_ASSETMANAGER'])
+
     def create() {
         respond new Asset(params)
     }
-    @Secured(['ROLE_ADMIN','ROLE_ASSETMANAGER'])
+
     def save(Asset asset) {
         if (asset == null) {
             notFound()
@@ -44,11 +45,11 @@ class AssetController {
             '*' { respond asset, [status: CREATED] }
         }
     }
-    @Secured(['ROLE_ADMIN','ROLE_ASSETMANAGER'])
+
     def edit(Long id) {
         respond assetService.get(id)
     }
-    @Secured(['ROLE_ADMIN','ROLE_ASSETMANAGER'])
+
     def update(Asset asset) {
         if (asset == null) {
             notFound()
@@ -70,7 +71,7 @@ class AssetController {
             '*'{ respond asset, [status: OK] }
         }
     }
-    @Secured(['ROLE_ADMIN', 'ROLE_ASSETMANAGER'])
+
     def delete(Long id) {
         if (id == null) {
             notFound()
@@ -88,13 +89,12 @@ class AssetController {
         }
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ASSETMANAGER'])
-    def search(params) {
-        def result =[:]
+    def search ( params, Asset asset ) {
+        def result = [: ]
 
-        if (params.q) {
-            def criteria = Asset.createCriteria()
-            result.assetInstanceList = criteria.list(params) {
+        if ( params.q ) {
+            def criteria = Asset.createCriteria( )
+            result.assetInstanceList = criteria.list( params ){
                 or {
                     like("assetNumber", "%${params.q}%")
                     like("description", "%${params.q}%")
@@ -103,12 +103,12 @@ class AssetController {
                 }
             }
         } else {
-            result.assetInstanceList = Asset.list(params)
+            result.assetInstanceList = Asset.list( params )
         }
-        result.assetInstanceTotal = Asset.count()
+        result.assetInstanceTotal = Asset.count( )
 
-        render(view: "search", model: [assetInstanceTotal: result.assetInstanceTotal,
-                                       assetInstanceList: result.assetInstanceList,searchText:params.q])
+        render ( view: "search", model: [ assetInstanceTotal: result.assetInstanceTotal,
+            assetInstanceList: result.assetInstanceList, searchText: params.q ] )
     }
 
     protected void notFound() {

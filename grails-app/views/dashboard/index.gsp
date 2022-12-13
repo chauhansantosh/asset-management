@@ -84,7 +84,6 @@
             <div class="icon-section">
                 <i class="fa fa-tasks" aria-hidden="true"></i><br>
                 <small>Work Orders</small>
-                <sec:loggedInUserInfo field='username'/>
                 <p>${woCountByUser}</p>
             </div>
 
